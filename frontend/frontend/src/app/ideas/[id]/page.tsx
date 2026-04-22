@@ -271,17 +271,31 @@ export default function IdeaDetailPage() {
                 Repository Information
               </h2>
               <dl className="space-y-2 text-sm">
-                <div className="flex">
-                  <dt className="font-medium text-gray-700 w-32">Path:</dt>
-                  <dd className="text-gray-600 font-mono text-xs">
-                    {idea.gitPath}
+                <div className="flex flex-col gap-1">
+                  <dt className="font-medium text-gray-700">Repository Path:</dt>
+                  <dd>
+                    <a
+                      href={`https://github.com/raycarroll/et_asdlc/blob/main/${idea.gitPath}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline font-mono text-xs break-all"
+                    >
+                      https://github.com/raycarroll/et_asdlc/blob/main/{idea.gitPath}
+                    </a>
                   </dd>
                 </div>
                 {idea.gitCommitSha && (
-                  <div className="flex">
-                    <dt className="font-medium text-gray-700 w-32">Commit:</dt>
-                    <dd className="text-gray-600 font-mono text-xs">
-                      {idea.gitCommitSha.substring(0, 12)}
+                  <div className="flex flex-col gap-1">
+                    <dt className="font-medium text-gray-700">Commit:</dt>
+                    <dd>
+                      <a
+                        href={`https://github.com/raycarroll/et_asdlc/commit/${idea.gitCommitSha}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline font-mono text-xs"
+                      >
+                        {idea.gitCommitSha.substring(0, 12)}
+                      </a>
                     </dd>
                   </div>
                 )}
