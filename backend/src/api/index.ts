@@ -8,6 +8,7 @@ import { getConfig } from '../config/env.js';
 import { logger } from '../utils/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 import { createAuthRouter } from './auth.js';
+import { createIdeasRouter } from './ideas.js';
 import { rateLimitMiddleware } from './middleware/rate-limit.js';
 
 /**
@@ -55,10 +56,8 @@ export function createApp(pool: Pool): Express {
   // Authentication endpoints (no auth required for login/register)
   app.use('/api/v1/auth', createAuthRouter(pool));
 
-  // API routes will be mounted here
-  // TODO: Mount route handlers once they're implemented
-  // app.use('/api/v1/ideas', ideasRoutes);
-  // app.use('/api/v1/templates', templatesRoutes);
+  // Ideas endpoints (requires authentication)
+  app.use('/api/v1/ideas', createIdeasRouter(pool, config.git.ideasRepoPath));
 
   // 404 handler - must come after all routes
   app.use(notFoundHandler);
