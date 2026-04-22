@@ -1,0 +1,110 @@
+// Express.js API Server Configuration (Minimal version with auth)
+// Based on specs/001-idea-spec-workflow/contracts/api.md
+
+import express, { type Express } from 'express';
+import cors from 'cors';
+import { Pool } from 'pg';
+import { getConfig } from '../config/env.js';
+import { logger } from '../utils/logger.js';
+import { errorHandler, notFoundHandler } from './middleware/error.js';
+import { createAuthRouter } from './auth.js';
+import { rateLimitMiddleware } from './middleware/rate-limit.js';
+
+/**
+ * Create and configure Express application
+ */
+export function createApp(pool: Pool): Express {
+  const app = express();
+  const config = getConfig();
+
+  // CORS configuration
+  const corsOptions = {
+    origin: config.api.corsOrigin || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400, // 24 hours
+  };
+  app.use(cors(corsOptions));
+
+  // Body parsing middleware
+  app.use(express.json({ limit: '10mb' })); // For base64-encoded artifacts
+  app.use(express.urlencoded({ extended: true }));
+
+  // Rate limiting middleware
+  app.use(rateLimitMiddleware);
+
+  // Request logging middleware
+  app.use((req, res, next) => {
+    logger.info('Incoming request', {
+      method: req.method,
+      path: req.path,
+      ip: req.ip,
+    });
+    next();
+  });
+
+  // Simple health check endpoint (no auth required)
+  app.get('/api/v1/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Authentication endpoints (no auth required for login/register)
+  app.use('/api/v1/auth', createAuthRouter(pool));
+
+  // API routes will be mounted here
+  // TODO: Mount route handlers once they're implemented
+  // app.use('/api/v1/ideas', ideasRoutes);
+  // app.use('/api/v1/templates', templatesRoutes);
+
+  // 404 handler - must come after all routes
+  app.use(notFoundHandler);
+
+  // Error handler - must be last middleware
+  app.use(errorHandler);
+
+  return app;
+}
+
+/**
+ * Start the API server
+ */
+export async function startServer(): Promise<void> {
+  const config = getConfig();
+
+  // Create database connection pool
+  const pool = new Pool({
+    connectionString: config.database.url,
+  });
+
+  const app = createApp(pool);
+
+  const server = app.listen(config.api.port, () => {
+    logger.info('API server started', {
+      port: config.api.port,
+      baseUrl: config.api.baseUrl,
+      nodeEnv: process.env.NODE_ENV || 'development',
+    });
+  });
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    logger.info('Shutting down server...');
+    server.close(() => {
+      logger.info('Server shut down successfully');
+      process.exit(0);
+    });
+
+    // Force shutdown after 10 seconds
+    setTimeout(() => {
+      logger.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}

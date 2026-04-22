@@ -1,0 +1,193 @@
+// Health Check API Endpoint
+// Provides system health status for monitoring
+// Based on specs/001-idea-spec-workflow/contracts/api.md
+
+import { Router, Request, Response } from 'express';
+import { Pool } from 'pg';
+import { logger } from '../utils/logger.js';
+import { GitRepository } from '../../../shared/utils/git.js';
+import { getConfig } from '../config/env.js';
+
+export interface HealthStatus {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: string;
+  services: {
+    database: 'connected' | 'disconnected' | 'error';
+    git: 'accessible' | 'inaccessible' | 'error';
+    templateSync: 'up-to-date' | 'outdated' | 'unknown' | 'error';
+  };
+  version?: string;
+}
+
+/**
+ * Create health check router
+ */
+export function createHealthRouter(pool: Pool): Router {
+  const router = Router();
+
+  /**
+   * GET /api/v1/health
+   * Health check endpoint (no authentication required)
+   */
+  router.get('/', async (req: Request, res: Response) => {
+    try {
+      const healthStatus = await checkHealth(pool);
+
+      const statusCode = healthStatus.status === 'healthy' ? 200 : 503;
+
+      res.status(statusCode).json(healthStatus);
+    } catch (error) {
+      logger.error('Health check failed', { error });
+
+      const errorStatus: HealthStatus = {
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        services: {
+          database: 'error',
+          git: 'error',
+          templateSync: 'error',
+        },
+      };
+
+      res.status(503).json(errorStatus);
+    }
+  });
+
+  return router;
+}
+
+/**
+ * Check overall system health
+ */
+async function checkHealth(pool: Pool): Promise<HealthStatus> {
+  const timestamp = new Date().toISOString();
+
+  // Check database connection
+  const databaseStatus = await checkDatabase(pool);
+
+  // Check git repository access
+  const gitStatus = await checkGitRepository();
+
+  // Check template sync status
+  const templateSyncStatus = await checkTemplateSync(pool);
+
+  // Determine overall status
+  let overallStatus: HealthStatus['status'] = 'healthy';
+
+  if (
+    databaseStatus === 'error' ||
+    gitStatus === 'error' ||
+    templateSyncStatus === 'error'
+  ) {
+    overallStatus = 'unhealthy';
+  } else if (
+    databaseStatus === 'disconnected' ||
+    gitStatus === 'inaccessible' ||
+    templateSyncStatus === 'outdated'
+  ) {
+    overallStatus = 'degraded';
+  }
+
+  return {
+    status: overallStatus,
+    timestamp,
+    services: {
+      database: databaseStatus,
+      git: gitStatus,
+      templateSync: templateSyncStatus,
+    },
+    version: process.env.APP_VERSION || '1.0.0',
+  };
+}
+
+/**
+ * Check database connectivity
+ */
+async function checkDatabase(
+  pool: Pool
+): Promise<HealthStatus['services']['database']> {
+  try {
+    const result = await pool.query('SELECT 1');
+
+    if (result.rowCount === 1) {
+      return 'connected';
+    }
+
+    return 'disconnected';
+  } catch (error) {
+    logger.error('Database health check failed', { error });
+    return 'error';
+  }
+}
+
+/**
+ * Check git repository accessibility
+ */
+async function checkGitRepository(): Promise<HealthStatus['services']['git']> {
+  try {
+    const config = getConfig();
+    const templatesPath = config.templates?.localPath;
+
+    if (!templatesPath) {
+      logger.warn('Templates path not configured');
+      return 'inaccessible';
+    }
+
+    const git = new GitRepository({ repoPath: templatesPath });
+    const exists = await git.repositoryExists();
+
+    if (!exists) {
+      return 'inaccessible';
+    }
+
+    // Try to get current SHA to verify repository is valid
+    await git.getCurrentSha();
+
+    return 'accessible';
+  } catch (error) {
+    logger.error('Git health check failed', { error });
+    return 'error';
+  }
+}
+
+/**
+ * Check template sync status
+ */
+async function checkTemplateSync(
+  pool: Pool
+): Promise<HealthStatus['services']['templateSync']> {
+  try {
+    const result = await pool.query<{
+      last_check_timestamp: Date;
+      next_check_due: Date;
+    }>(
+      `SELECT last_check_timestamp, next_check_due
+       FROM template_update_cache
+       ORDER BY last_check_timestamp DESC
+       LIMIT 1`
+    );
+
+    if (result.rows.length === 0) {
+      // No cache exists - templates not yet initialized
+      return 'unknown';
+    }
+
+    const cache = result.rows[0];
+    const now = new Date();
+
+    // Check if templates are significantly overdue (more than 48 hours)
+    const hoursSinceLastCheck =
+      (now.getTime() - cache.last_check_timestamp.getTime()) / (1000 * 60 * 60);
+
+    if (hoursSinceLastCheck > 48) {
+      return 'outdated';
+    }
+
+    return 'up-to-date';
+  } catch (error) {
+    logger.error('Template sync health check failed', { error });
+    return 'error';
+  }
+}
+
+export default createHealthRouter;

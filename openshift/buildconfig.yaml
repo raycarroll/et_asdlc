@@ -1,0 +1,63 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: backend
+  namespace: idea-workflow
+  labels:
+    app: backend
+spec:
+  source:
+    type: Binary  # Changed from Git to Binary for local builds
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: backend/Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: backend:latest
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: backend
+  namespace: idea-workflow
+  labels:
+    app: backend
+
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: frontend
+  namespace: idea-workflow
+  labels:
+    app: frontend
+spec:
+  source:
+    type: Binary  # Changed from Git to Binary for local builds
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: frontend/Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: frontend:latest
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: frontend
+  namespace: idea-workflow
+  labels:
+    app: frontend

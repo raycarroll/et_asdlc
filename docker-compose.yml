@@ -1,0 +1,108 @@
+# Docker Compose for Local Development
+# This is for local testing before deploying to OpenShift
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgresql:
+    image: postgres:15-alpine
+    container_name: idea-workflow-db
+    environment:
+      POSTGRES_USER: ideas
+      POSTGRES_PASSWORD: development
+      POSTGRES_DB: ideas
+      POSTGRES_MAX_CONNECTIONS: 100
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ideas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - idea-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: idea-workflow-backend
+    environment:
+      # Database
+      DATABASE_URL: postgresql://ideas:development@postgresql:5432/ideas
+      DATABASE_POOL_SIZE: 20
+
+      # Git Repositories
+      IDEAS_REPO_URL: https://github.com/your-org/ideas-repository.git
+      IDEAS_REPO_PATH: /app/data/ideas-repo
+      TEMPLATES_REPO_URL: https://github.com/your-org/idea-templates.git
+      TEMPLATES_REPO_PATH: /app/data/templates-repo
+
+      # Authentication
+      JWT_SECRET: development-secret-key-minimum-32-characters-long
+      JWT_EXPIRATION: 24h
+
+      # API
+      API_PORT: 3001
+      API_BASE_URL: http://localhost:3001
+
+      # Template Updates
+      TEMPLATE_UPDATE_INTERVAL_HOURS: 24
+      TEMPLATE_UPDATE_CACHE_PATH: /app/data/template-cache.json
+
+      # Logging
+      LOG_LEVEL: debug
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+    volumes:
+      - backend-data:/app/data
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - idea-network
+
+  # Frontend UI
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: idea-workflow-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - idea-network
+
+networks:
+  idea-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
+  backend-data:
+    driver: local

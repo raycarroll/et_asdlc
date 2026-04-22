@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idea-workflow-config
+  namespace: idea-workflow
+  labels:
+    app: idea-workflow
+data:
+  # API Configuration
+  API_PORT: "3001"
+  API_BASE_URL: "http://backend:3001"
+
+  # Database Configuration (non-sensitive)
+  DATABASE_POOL_SIZE: "20"
+
+  # Git Repository Configuration
+  IDEAS_REPO_PATH: "/app/data/ideas-repo"
+  TEMPLATES_REPO_PATH: "/app/data/templates-repo"
+
+  # Template Update Configuration
+  TEMPLATE_UPDATE_INTERVAL_HOURS: "24"
+  TEMPLATE_UPDATE_CACHE_PATH: "/app/data/template-cache.json"
+
+  # JWT Configuration
+  JWT_EXPIRATION: "24h"
+
+  # Logging
+  LOG_LEVEL: "info"
+
+  # Frontend Configuration
+  NEXT_PUBLIC_API_URL: "https://backend-idea-workflow.apps.rosa.catoconn-ray-et.bo0z.p3.openshiftapps.com/api/v1"

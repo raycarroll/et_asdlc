@@ -1,0 +1,201 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: idea-workflow
+  labels:
+    app: backend
+    component: api
+spec:
+  replicas: 1  # Single replica due to RWO PVC limitation
+  strategy:
+    type: Recreate  # Must use Recreate strategy with RWO volumes
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        component: api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backend
+          image: quay.io/rcarroll/idea-workflow-backend:auth-final
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+              protocol: TCP
+              name: http
+          env:
+            # Database configuration from secret
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: idea-workflow-secrets
+                  key: DATABASE_URL
+            # JWT configuration from secret
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: idea-workflow-secrets
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: JWT_EXPIRATION
+            # API configuration from ConfigMap
+            - name: API_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: API_PORT
+            - name: API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: API_BASE_URL
+            # Database pool configuration
+            - name: DATABASE_POOL_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: DATABASE_POOL_SIZE
+            # Git repository URLs from secret
+            - name: IDEAS_REPO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: idea-workflow-secrets
+                  key: IDEAS_REPO_URL
+            - name: TEMPLATES_REPO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: idea-workflow-secrets
+                  key: TEMPLATES_REPO_URL
+            # Git repository paths from ConfigMap
+            - name: IDEAS_REPO_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: IDEAS_REPO_PATH
+            - name: TEMPLATES_REPO_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: TEMPLATES_REPO_PATH
+            # Template update configuration
+            - name: TEMPLATE_UPDATE_INTERVAL_HOURS
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: TEMPLATE_UPDATE_INTERVAL_HOURS
+            - name: TEMPLATE_UPDATE_CACHE_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: TEMPLATE_UPDATE_CACHE_PATH
+            # Logging
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: idea-workflow-config
+                  key: LOG_LEVEL
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3001
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3001
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: backend-data
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-data
+  namespace: idea-workflow
+  labels:
+    app: backend
+spec:
+  accessModes:
+    - ReadWriteOnce  # Changed from RWX to RWO for AWS EBS compatibility
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: idea-workflow
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+      name: http
+  selector:
+    app: backend
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: backend
+  namespace: idea-workflow
+  labels:
+    app: backend
+spec:
+  to:
+    kind: Service
+    name: backend
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

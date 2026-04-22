@@ -1,0 +1,64 @@
+# Default Validation Guideline
+# Based on specs/001-idea-spec-workflow/contracts/git-repository.md
+
+name: default
+description: Standard validation guideline for feature ideas
+version: 1.0.0
+
+questions:
+  - id: user-goal
+    text: "Who is the primary user for this feature?"
+    type: multiple-choice
+    options:
+      - "End users (customers)"
+      - "Internal team members (admins, support)"
+      - "Developers/integrators (API consumers)"
+      - "Other (please specify)"
+    followup:
+      if: "Other (please specify)"
+      text: "Please describe the user type:"
+
+  - id: main-goal
+    text: "What is the main goal this feature will achieve?"
+    type: short-answer
+    maxLength: 200
+
+  - id: success-criteria
+    text: "What does success look like for this feature? How will you measure it?"
+    type: short-answer
+    maxLength: 250
+
+  - id: user-scenarios
+    text: "Describe a typical user scenario where this feature would be used:"
+    type: short-answer
+    maxLength: 300
+
+  - id: edge-cases
+    text: "What edge cases or error conditions should be handled?"
+    type: short-answer
+    maxLength: 250
+
+  - id: constraints
+    text: "Are there any technical constraints, dependencies, or compliance requirements?"
+    type: short-answer
+    maxLength: 200
+
+  - id: out-of-scope
+    text: "What is explicitly OUT of scope for this feature?"
+    type: short-answer
+    maxLength: 200
+
+  - id: data-entities
+    text: "What key data entities or concepts are involved? (e.g., User, Order, Payment)"
+    type: short-answer
+    maxLength: 200
+
+  - id: acceptance-test
+    text: "How would you test that this feature works correctly?"
+    type: short-answer
+    maxLength: 250
+
+  - id: priority-justification
+    text: "Why is this feature important now? What problem does it solve?"
+    type: short-answer
+    maxLength: 200

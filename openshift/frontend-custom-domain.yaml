@@ -1,0 +1,46 @@
+# Custom Domain Route for Frontend
+# Use this if you want to expose the UI on your own domain instead of the default OpenShift domain
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend-custom
+  namespace: idea-workflow
+  labels:
+    app: frontend
+  annotations:
+    haproxy.router.openshift.io/timeout: "60s"
+spec:
+  host: ideas.example.com  # CHANGE THIS to your custom domain
+  to:
+    kind: Service
+    name: frontend
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    # Optional: Use your own TLS certificate
+    # certificate: |
+    #   -----BEGIN CERTIFICATE-----
+    #   <your certificate>
+    #   -----END CERTIFICATE-----
+    # key: |
+    #   -----BEGIN PRIVATE KEY-----
+    #   <your private key>
+    #   -----END PRIVATE KEY-----
+    # caCertificate: |
+    #   -----BEGIN CERTIFICATE-----
+    #   <your CA certificate>
+    #   -----END CERTIFICATE-----
+  wildcardPolicy: None
+
+---
+# Instructions:
+# 1. Update the 'host' field with your custom domain
+# 2. Point your DNS to the OpenShift router IP:
+#    ideas.example.com → <openshift-router-ip>
+# 3. (Optional) Add your TLS certificate in the tls section
+# 4. Apply: oc apply -f frontend-custom-domain.yaml
+# 5. Test: curl -I https://ideas.example.com

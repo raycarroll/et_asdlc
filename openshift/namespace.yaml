@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: idea-workflow
+  labels:
+    app: idea-workflow
+    environment: production
