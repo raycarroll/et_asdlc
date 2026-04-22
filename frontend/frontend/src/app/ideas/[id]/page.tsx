@@ -5,13 +5,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getIdea, type IdeaDetail } from '../../../services/api';
 import { isAuthenticated } from '../../../services/auth';
 
-export default function IdeaDetailPage({ params }: { params: { id: string } }) {
+export default function IdeaDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const ideaId = params?.id as string;
   const [idea, setIdea] = useState<IdeaDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,11 +27,13 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
 
   // Fetch idea details
   useEffect(() => {
+    if (!ideaId) return;
+
     const fetchIdea = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getIdea(params.id);
+        const data = await getIdea(ideaId);
         setIdea(data);
       } catch (err) {
         const errorMessage =
@@ -42,7 +46,7 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
     };
 
     fetchIdea();
-  }, [params.id]);
+  }, [ideaId]);
 
   if (loading) {
     return (
