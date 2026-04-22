@@ -1,0 +1,42 @@
+{
+  "id": "test-idea-001",
+  "title": "Test Idea for Idea Workflow System",
+  "author": {
+    "name": "Ray Carroll",
+    "email": "admin@example.com",
+    "userId": "manual-test"
+  },
+  "status": "published",
+  "timestamps": {
+    "created": "2026-04-22T16:04:02Z",
+    "updated": "2026-04-22T16:04:02Z",
+    "published": "2026-04-22T16:04:02Z"
+  },
+  "git": {
+    "path": "ideas/20260422-160402-test-idea/spec.md",
+    "commitSha": null,
+    "branch": "main"
+  },
+  "tags": [
+    "test",
+    "infrastructure",
+    "validation",
+    "proof-of-concept"
+  ],
+  "category": "system-test",
+  "version": "1.0",
+  "template": {
+    "guideline": "default-questions.yaml",
+    "spec": "default-spec.md",
+    "version": "1.0"
+  },
+  "validation": {
+    "sessionId": "manual-test-001",
+    "questionsAnswered": 10,
+    "completedAt": "2026-04-22T16:04:02Z"
+  },
+  "database": {
+    "registered": false,
+    "registrationNote": "Pending interactive input implementation"
+  }
+}
