@@ -14,7 +14,7 @@
   },
   "git": {
     "path": "ideas/20260422-160402-test-idea/spec.md",
-    "commitSha": null,
+    "commitSha": "2a83ec352acaa107efc244dda597e3569efcc702",
     "branch": "main"
   },
   "tags": [
@@ -36,7 +36,9 @@
     "completedAt": "2026-04-22T16:04:02Z"
   },
   "database": {
-    "registered": false,
-    "registrationNote": "Pending interactive input implementation"
+    "registered": true,
+    "id": "a1b2c3d4-e5f6-4789-a012-345678901234",
+    "registeredAt": "2026-04-22T16:07:00Z",
+    "registrationNote": "Manually inserted for testing"
   }
 }
