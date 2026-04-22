@@ -65,10 +65,14 @@ export function createIdeasRouter(pool: Pool) {
 
       return res.json({
         ideas,
-        total: ideas.length,
-        page: 1,
-        pageSize: 100,
-        totalPages: 1,
+        pagination: {
+          page: 1,
+          pageSize: 100,
+          totalItems: ideas.length,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
       });
     } catch (error) {
       logger.error('Error listing ideas', {
@@ -140,10 +144,13 @@ export function createIdeasRouter(pool: Pool) {
           email: row.author_email,
           name: row.author_name,
         },
-        summary: row.summary,
-        goals: row.goals,
-        requirements: row.requirements,
-        tags: row.tags || [],
+        metadata: {
+          summary: row.summary,
+          goals: row.goals,
+          requirements: row.requirements,
+          tags: row.tags || [],
+        },
+        artifacts: [], // No artifacts in simplified version
       };
 
       logger.info('Idea retrieved successfully', { id });
