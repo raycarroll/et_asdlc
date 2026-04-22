@@ -16,6 +16,8 @@ data:
   # Git Repository Configuration
   IDEAS_REPO_PATH: "/app/data/ideas-repo"
   TEMPLATES_REPO_PATH: "/app/data/templates-repo"
+  IDEAS_REPO_URL: "https://github.com/raycarroll/et_asdlc.git"
+  TEMPLATES_REPO_URL: "https://github.com/raycarroll/et_asdlc.git"
 
   # Template Update Configuration
   TEMPLATE_UPDATE_INTERVAL_HOURS: "24"
