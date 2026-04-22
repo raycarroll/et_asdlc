@@ -4,14 +4,14 @@
   "git": {
     "commitSha": "adf740dc9bcd9e999ba5017cb2a7b7178cb5d4cc",
     "branch": "main",
-    "path": "specs/002-order-tracking-website/spec.md"
+    "path": "ideas/20260422-170831-order-tracking-website/spec.md"
   },
   "database": {
     "registered": true,
     "id": "f26da725-6a12-4db6-b761-f4b078bdff66",
-    "registeredAt": "2026-04-22T15:52:00Z"
+    "registeredAt": "2026-04-22T17:08:31Z"
   },
   "status": "draft",
-  "createdAt": "2026-04-22T15:52:00Z",
+  "createdAt": "2026-04-22T17:08:31Z",
   "publishedAt": null
 }
