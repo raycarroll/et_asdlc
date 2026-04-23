@@ -7,7 +7,7 @@ Three Claude Code skills that implement a workflow for creating, validating, and
 ### Remote Installation (Recommended)
 
 ```bash
-# Install all skills to ~/.claude/skills/idea-workflow
+# Install all skills to ~/.claude/skills/
 curl -fsSL https://raw.githubusercontent.com/raycarroll/et_asdlc/main/idea-workflow-skills/install.sh | bash
 
 # Set up authentication
@@ -131,7 +131,7 @@ The installer can run remotely (via curl) or locally, and installs skills to you
 
 ### Remote Installation
 
-**Install all skills** (default location: `~/.claude/skills/idea-workflow`):
+**Install all skills** (default location: `~/.claude/skills/`):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/raycarroll/et_asdlc/main/idea-workflow-skills/install.sh | bash
 ```
@@ -168,7 +168,7 @@ cd idea-workflow-skills
 
 | Option | Description |
 |--------|-------------|
-| `--target-dir DIR` | Install to specified directory (default: `~/.claude/skills/idea-workflow`) |
+| `--target-dir DIR` | Install to specified directory (default: `~/.claude/skills`) |
 | `--expand-only` | Install only expand-idea skill |
 | `--publish-only` | Install only publish-idea skill |
 | `--submit-only` | Install only submit-idea skill |
@@ -181,7 +181,7 @@ cd idea-workflow-skills
 
 1. **Checks dependencies**: bash, jq, git, yq/python3, curl
 2. **Downloads skills** (if remote) or uses local files
-3. **Copies to target directory**: Default `~/.claude/skills/idea-workflow/`
+3. **Copies to target directory**: Each skill installed to `~/.claude/skills/skill-name/`
 4. **Makes scripts executable**: All `.sh` files in `scripts/` directories
 5. **Validates configuration**: Checks `config.json` files are valid JSON
 6. **Shows setup instructions**: Next steps for configuration
@@ -206,7 +206,7 @@ source ~/.bashrc
 
 ### Backend API Configuration
 
-Edit the `config.json` files in the installed skills directory (default: `~/.claude/skills/idea-workflow/`):
+Edit the `config.json` files in the installed skills directories (default: `~/.claude/skills/`):
 
 **publish-idea/config.json**:
 ```json

@@ -14,7 +14,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Default configuration
-DEFAULT_TARGET_DIR="${HOME}/.claude/skills/idea-workflow"
+DEFAULT_TARGET_DIR="${HOME}/.claude/skills"
 REPO_URL="https://github.com/raycarroll/et_asdlc.git"
 REPO_BRANCH="main"
 REPO_SUBDIR="idea-workflow-skills"
@@ -30,7 +30,7 @@ show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --target-dir DIR        Install to specified directory (default: ~/.claude/skills/idea-workflow)"
+    echo "  --target-dir DIR        Install to specified directory (default: ~/.claude/skills)"
     echo "  --expand-only           Install only expand-idea skill"
     echo "  --publish-only          Install only publish-idea skill"
     echo "  --submit-only           Install only submit-idea skill"
@@ -40,18 +40,21 @@ show_help() {
     echo "  --help, -h              Show this help message"
     echo ""
     echo "Examples:"
-    echo "  # Remote install (all skills)"
+    echo "  # Remote install (all skills to ~/.claude/skills/)"
     echo "  curl -fsSL https://raw.githubusercontent.com/.../install.sh | bash"
     echo ""
-    echo "  # Remote install with options"
-    echo "  curl -fsSL https://... | bash -s -- --expand-only --target-dir ~/.claude/skills"
+    echo "  # Remote install with custom directory"
+    echo "  curl -fsSL https://... | bash -s -- --target-dir /custom/path"
     echo ""
     echo "  # Local install"
     echo "  ./install.sh"
-    echo "  ./install.sh --target-dir ~/.claude/skills/my-ideas"
+    echo "  ./install.sh --target-dir /custom/path"
     echo ""
     echo "  # Install from local source"
     echo "  ./install.sh --local-source /path/to/idea-workflow-skills"
+    echo ""
+    echo "Note: Each skill will be installed as a separate directory under the target directory."
+    echo "      Example: ~/.claude/skills/expand-idea/, ~/.claude/skills/publish-idea/"
     echo ""
 }
 
@@ -224,20 +227,31 @@ fi
 
 echo ""
 
-# Check if target directory exists
-if [ -d "$TARGET_DIR" ]; then
-    if [ "$FORCE" = false ]; then
-        echo -e "${YELLOW}⚠️  Target directory already exists: $TARGET_DIR${NC}"
-        echo ""
-        read -p "Overwrite existing installation? [y/N] " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "Installation cancelled"
-            exit 1
-        fi
-    else
-        echo -e "${YELLOW}⚠️  Overwriting existing installation (--force)${NC}"
+# Check if any skills already exist
+existing_skills=()
+case $INSTALL_MODE in
+    expand) [ -d "$TARGET_DIR/expand-idea" ] && existing_skills+=("expand-idea") ;;
+    publish) [ -d "$TARGET_DIR/publish-idea" ] && existing_skills+=("publish-idea") ;;
+    submit) [ -d "$TARGET_DIR/submit-idea" ] && existing_skills+=("submit-idea") ;;
+    all)
+        [ -d "$TARGET_DIR/expand-idea" ] && existing_skills+=("expand-idea")
+        [ -d "$TARGET_DIR/publish-idea" ] && existing_skills+=("publish-idea")
+        [ -d "$TARGET_DIR/submit-idea" ] && existing_skills+=("submit-idea")
+        ;;
+esac
+
+if [ ${#existing_skills[@]} -gt 0 ] && [ "$FORCE" = false ]; then
+    echo -e "${YELLOW}⚠️  Existing skills found: ${existing_skills[*]}${NC}"
+    echo ""
+    read -p "Overwrite existing skills? [y/N] " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Installation cancelled"
+        exit 1
     fi
+    echo ""
+elif [ ${#existing_skills[@]} -gt 0 ]; then
+    echo -e "${YELLOW}⚠️  Overwriting existing skills: ${existing_skills[*]} (--force)${NC}"
     echo ""
 fi
 
@@ -326,26 +340,21 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Installation location
-echo -e "${CYAN}Installation Location:${NC}"
-echo "  $TARGET_DIR"
-echo ""
-
-# Installed skills summary
 echo -e "${CYAN}Installed Skills:${NC}"
 case $INSTALL_MODE in
     expand)
-        echo "  ✓ /expand_idea - Create idea specifications locally"
+        echo "  ✓ /expand_idea → ${TARGET_DIR}/expand-idea/"
         ;;
     publish)
-        echo "  ✓ /publish_idea - Publish specs to central repository"
+        echo "  ✓ /publish_idea → ${TARGET_DIR}/publish-idea/"
         ;;
     submit)
-        echo "  ✓ /submit_idea - Validate and publish with gates"
+        echo "  ✓ /submit_idea → ${TARGET_DIR}/submit-idea/"
         ;;
     all)
-        echo "  ✓ /expand_idea - Create idea specifications locally"
-        echo "  ✓ /publish_idea - Publish specs to central repository"
-        echo "  ✓ /submit_idea - Validate and publish with gates"
+        echo "  ✓ /expand_idea → ${TARGET_DIR}/expand-idea/"
+        echo "  ✓ /publish_idea → ${TARGET_DIR}/publish-idea/"
+        echo "  ✓ /submit_idea → ${TARGET_DIR}/submit-idea/"
         ;;
 esac
 echo ""

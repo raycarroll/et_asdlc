@@ -37,7 +37,7 @@ cd et_asdlc/idea-workflow-skills
 ./install.sh --submit-only
 ```
 
-**Default installation location**: `~/.claude/skills/idea-workflow/submit-idea/`
+**Default installation location**: `~/.claude/skills/submit-idea/`
 
 ## What It Does
 
@@ -176,7 +176,7 @@ This skill introduces **workflow orchestration** to idea management:
 Download the latest workflow from central repository:
 
 ```bash
-curl -o ~/.claude/skills/idea-workflow/submit-idea/workflows/idea-workflow.yaml \
+curl -o ~/.claude/skills/submit-idea/workflows/idea-workflow.yaml \
   https://raw.githubusercontent.com/raycarroll/ideas_central/main/workflows/idea-workflow.yaml
 ```
 

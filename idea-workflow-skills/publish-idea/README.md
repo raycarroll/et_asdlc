@@ -36,7 +36,7 @@ cd et_asdlc/idea-workflow-skills
 ./install.sh --publish-only
 ```
 
-**Default installation location**: `~/.claude/skills/idea-workflow/publish-idea/`
+**Default installation location**: `~/.claude/skills/publish-idea/`
 
 ## What It Does
 

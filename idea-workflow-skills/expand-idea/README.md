@@ -44,7 +44,7 @@ cd et_asdlc/idea-workflow-skills
 ./install.sh --target-dir ~/.claude/skills/my-ideas --expand-only
 ```
 
-**Default installation location**: `~/.claude/skills/idea-workflow/expand-idea/`
+**Default installation location**: `~/.claude/skills/expand-idea/`
 
 See [INSTALL.md](./INSTALL.md) for detailed installation instructions.
 
