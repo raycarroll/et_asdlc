@@ -1,0 +1,9 @@
+{
+  "$schema": "./config.schema.json",
+  "backendApiUrl": "https://backend-idea-workflow.apps.rosa.catoconn-ray-et.bo0z.p3.openshiftapps.com/api/v1",
+  "templatesRepoUrl": "https://github.com/raycarroll/ideas_central.git",
+  "authToken": "${AUTH_TOKEN}",
+  "localIdeasPath": "./ideas",
+  "sessionStoragePath": ".claude/skills/expand-idea/sessions",
+  "templateCachePath": ".claude/skills/expand-idea/templates"
+}

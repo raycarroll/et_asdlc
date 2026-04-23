@@ -12,6 +12,24 @@ A workflow system for validating and publishing ideas with guided prompts, atomi
 
 ## Quick Start
 
+### Claude Code Skills (Optional)
+
+For creating and submitting ideas via Claude Code commands:
+
+```bash
+# Install idea workflow skills
+curl -fsSL https://raw.githubusercontent.com/raycarroll/et_asdlc/main/idea-workflow-skills/install.sh | bash
+
+# Set authentication
+export AUTH_TOKEN='your-api-token'
+
+# Use the skills
+/expand_idea "Add user authentication with OAuth2"
+/submit_idea ideas/20260423-110000-oauth2-auth/spec.md
+```
+
+See [idea-workflow-skills/README.md](idea-workflow-skills/README.md) for details.
+
 ### Prerequisites
 
 - Node.js 18+ and npm
@@ -87,7 +105,14 @@ export QUAY_USERNAME=your-quay-username
 ├── templates/        # Validation templates
 ├── openshift/        # OpenShift deployment manifests
 ├── scripts/          # Build and deployment scripts
-└── docs/            # Documentation
+├── docs/            # Documentation
+├── idea-workflow-skills/  # Claude Code skills (distributable)
+│   ├── expand-idea/       # Create idea specs
+│   ├── publish-idea/      # Publish to repository
+│   ├── submit-idea/       # Validate and publish
+│   └── install.sh         # Master installer
+└── .claude/          # Project-specific Claude Code config
+    └── skills/       # Spec Kit development skills
 ```
 
 ## User Stories

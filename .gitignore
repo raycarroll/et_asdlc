@@ -52,8 +52,15 @@ temp/
 *.sqlite
 *.db
 
-# Session data
-.claude/idea-workflow/sessions/
+# Claude Code - Personal settings and generated content
+.claude/settings.local.json
+.claude/**/.DS_Store
+.claude/**/sessions/
+.claude/**/node_modules/
+.claude/**/dist/
+.claude/**/build/
+
+# Note: .claude/skills/ and .claude/settings.json ARE committed (project-specific)
 
 # Docker
 .dockerignore

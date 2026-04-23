@@ -1,0 +1,4 @@
+{
+  "workflowDefinition": "./workflows/idea-workflow.yaml",
+  "publishSkillPath": "../publish-idea/scripts/publish-idea.sh"
+}

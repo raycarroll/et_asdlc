@@ -1,0 +1,10 @@
+# Logs
+*.log
+
+# Environment variables (security)
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db

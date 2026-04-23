@@ -1,0 +1,77 @@
+# Default Validation Questions
+# These questions guide users through idea validation
+
+questions:
+  - id: overview
+    category: problem
+    text: "What problem does this idea solve? Be specific about the pain point."
+    required: true
+    validation:
+      min_length: 20
+      max_length: 500
+
+  - id: users
+    category: problem
+    text: "Who are the primary users or beneficiaries of this solution?"
+    required: true
+    options:
+      - "End users (customers)"
+      - "Internal team members"
+      - "Developers/API consumers"
+      - "System administrators"
+      - "Other"
+
+  - id: problem_statement
+    category: problem
+    text: "Describe the current state and why it's problematic."
+    required: true
+    validation:
+      min_length: 50
+      max_length: 1000
+
+  - id: proposed_solution
+    category: solution
+    text: "How do you propose to solve this problem? High-level approach."
+    required: true
+    validation:
+      min_length: 50
+      max_length: 1000
+
+  - id: user_stories
+    category: solution
+    text: "List 2-3 key user stories (As a [user], I want [goal], so that [benefit])"
+    required: true
+    validation:
+      min_length: 100
+
+  - id: success_criteria
+    category: validation
+    text: "How will you know this idea succeeded? What are measurable outcomes?"
+    required: true
+    validation:
+      min_length: 50
+
+  - id: alternatives
+    category: validation
+    text: "What alternatives did you consider? Why is this approach better?"
+    required: false
+
+  - id: technical_approach
+    category: implementation
+    text: "Any specific technical requirements or constraints to consider?"
+    required: false
+
+  - id: open_questions
+    category: validation
+    text: "What questions or uncertainties remain?"
+    required: false
+
+  - id: references
+    category: context
+    text: "Any relevant links, documents, or prior art?"
+    required: false
+
+metadata:
+  version: "1.0"
+  last_updated: "2026-04-22"
+  description: "Default validation questions for general ideas"

@@ -1,0 +1,85 @@
+# Idea Workflow Definition
+# Version: 1.0.0
+#
+# This workflow defines the stages and gates for idea management.
+# It runs on the user's Claude Code instance but is defined centrally.
+
+name: idea-workflow
+version: 1.0.0
+description: Standard workflow for creating and submitting ideas
+
+stages:
+  # Stage 1: Specify
+  - name: specify
+    description: Create and validate idea specification locally
+    commands:
+      - expand_idea
+    outputs:
+      - artifact: spec.md
+        description: Idea specification document
+        required: true
+    gates: []
+
+  # Stage 2: Submit
+  - name: submit
+    description: Validate and submit idea to central repository
+    commands:
+      - submit_idea
+    gates:
+      # Gate 1: Artifact Check
+      - name: artifact_check
+        type: required_files
+        description: Verify all required artifacts exist
+        artifacts:
+          - name: spec.md
+            pattern: "ideas/*/spec.md"
+            required: true
+            min_size: 100  # Minimum 100 bytes
+        on_fail:
+          message: "Missing required artifact: spec.md"
+          action: block
+
+      # Gate 2: Content Validation
+      - name: content_validation
+        type: spec_validation
+        description: Verify spec.md has required sections
+        checks:
+          - name: has_title
+            pattern: "^# "
+            required: true
+            message: "Spec must have a title (# heading)"
+
+          - name: has_problem_statement
+            pattern: "## Problem Statement"
+            required: true
+            message: "Spec must have a Problem Statement section"
+
+          - name: has_solution
+            pattern: "## Proposed Solution"
+            required: true
+            message: "Spec must have a Proposed Solution section"
+
+          - name: has_success_criteria
+            pattern: "## Success Criteria"
+            required: false
+            message: "Warning: No Success Criteria section found"
+
+        on_fail:
+          message: "Specification validation failed"
+          action: block
+
+    # Actions to run when gates pass
+    on_success:
+      - action: publish
+        skill: publish_idea
+        args: "${SPEC_PATH}"
+
+    on_fail:
+      - action: report
+        message: "Submit failed - fix validation errors and try again"
+
+# Workflow metadata
+metadata:
+  author: "Central Repository"
+  updated: "2026-04-23"
+  source: "https://github.com/raycarroll/ideas_central.git"
