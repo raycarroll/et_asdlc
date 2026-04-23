@@ -12,6 +12,17 @@ out/
 .next/
 .cache/
 
+# TypeScript build artifacts in source directories (should be in dist/)
+backend/src/**/*.js
+backend/src/**/*.d.ts
+backend/src/**/*.d.ts.map
+backend/src/**/*.js.map
+shared/types/**/*.js
+shared/types/**/*.d.ts
+shared/types/**/*.d.ts.map
+shared/types/**/*.js.map
+frontend/src/**/*.js.map
+
 # Environment variables
 .env
 .env.local
